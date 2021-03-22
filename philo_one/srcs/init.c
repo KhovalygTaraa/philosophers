@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/17 20:59:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/21 20:33:33 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/22 12:43:58 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	init_philo(t_shrmem *stat, int *val, int argc, int b)
 }
 
 
-t_shrmem	*init_env(int *v, pthread_mutex_t *f, pthread_mutex_t *g)
+t_shrmem	*init_env(int *v, t_init *init)
 {
 	t_shrmem		*new;
 	struct timeval	time;
@@ -47,8 +47,10 @@ t_shrmem	*init_env(int *v, pthread_mutex_t *f, pthread_mutex_t *g)
 	while (i != v[0])
 	{
 		new[i].time = (time.tv_usec / 1000) + (time.tv_sec * 1000);
-		new[i].forks = f;
-		new[i].guard = g;
+		new[i].forks = init->forks;
+		new[i].guard = init->guard;
+		new[i].neighbour = init->neighbour;
+		new[i].phils = v[0];
 		i++;
 	}
 	return (new);
@@ -59,15 +61,20 @@ t_init		*init(int *val)
 	int				b;
 	t_init			*init;
 
-	b = -1;
 	if (!(init = malloc(sizeof(t_init))))
 		return (NULL);
+	b = -1;
+	if (!(init->neighbour = malloc(sizeof(int) * (val[0] + 1))))
+		return (NULL);
+	while (++b != val[0] + 1)
+		init->neighbour[b] = b;
 	if (!(init->philo = malloc(sizeof(pthread_t) * val[0])))
 		return (NULL);
 	if (!(init->add = malloc(sizeof(pthread_t) * val[0])))
 		return (NULL);
 	if (!(init->guard = malloc(sizeof(pthread_mutex_t) * 10)))
 		return (NULL);
+	b = -1;
 	while (++b != 10)
 		pthread_mutex_init(&init->guard[b], NULL);
 	if (!(init->forks = malloc(sizeof(pthread_mutex_t) * val[0])))
@@ -92,5 +99,6 @@ void		deinit(t_init *init, int *val)
 	while (++b < val[0])
 		pthread_mutex_destroy(&init->forks[b]);
 	free(init->forks);
+	free(init->neighbour);
 	free(init);
 }

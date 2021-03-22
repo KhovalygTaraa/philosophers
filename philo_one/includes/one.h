@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/21 20:33:24 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/22 14:22:27 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,8 @@
 typedef struct	s_ph
 {
 	int		id;
-	int		nid1;
-	int		nid2;
 	int		start_die;
-	int		die;
+	size_t	die;
 	int		eat;
 	int		sleep;
 	int		left;
@@ -45,7 +43,9 @@ typedef struct	s_shrmem
 	pthread_mutex_t		*forks;
 	pthread_mutex_t		*guard;
 	size_t				time;
+	int					phils;
 	t_ph				*philo;
+	int					*neighbour;
 }				t_shrmem;
 
 typedef struct	s_init
@@ -54,6 +54,7 @@ typedef struct	s_init
 	pthread_mutex_t		*guard;
 	pthread_t			*philo;
 	pthread_t			*add;
+	int					*neighbour;
 }				t_init;
 
 void		ft_perror(char *str);
@@ -61,9 +62,9 @@ int			ft_strlen(char *str);
 int			ft_atoi(char *str);
 int			isdigit_arg(char **argv);
 void		init_philo(t_shrmem *stat, int *val, int argc, int b);
-t_shrmem	*init_env(int *val, pthread_mutex_t *f, pthread_mutex_t *g);
+t_shrmem	*init_env(int *val, t_init *init);
 void		take_forks(t_shrmem *stat);
-size_t		eating(t_shrmem *stat);
+void		eating(t_shrmem *stat);
 void		sleeping(t_shrmem *stat);
 void		print_time(t_shrmem *stat, int i);
 t_init		*init(int *val);

@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/21 20:47:54 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/22 14:05:37 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,20 +24,26 @@ void			*is_dead(void *arg)
 	stat = arg;
 	while (the_end == 0)
 	{
+		pthread_mutex_lock(&stat->guard[7]);
 		pthread_mutex_lock(&stat->guard[9]);
-		if (the_end == 1)
-			return (NULL);
 		gettimeofday(&time, NULL);
 		ms2 = (time.tv_usec / 1000) + (time.tv_sec * 1000);
-		ms = stat->philo->start - ms2;
+		ms = ms2 - stat->philo->start;
+		pthread_mutex_unlock(&stat->guard[9]);
+		if (the_end == 1)
+		{
+			pthread_mutex_unlock(&stat->guard[7]);
+			return (NULL);
+		}
 		if (ms >= stat->philo->die)
 		{
 			the_end = 1;
 			print_time(stat, DEAD);
-			pthread_mutex_unlock(&stat->guard[9]);
+			printf("%zu\n", ms);
+			pthread_mutex_unlock(&stat->guard[7]);
 			return (NULL);
 		}
-		pthread_mutex_unlock(&stat->guard[9]);
+		pthread_mutex_unlock(&stat->guard[7]);
 	}
 	return (NULL);
 }
@@ -75,10 +81,7 @@ static int		*check_args(int argc, char **argv)
 void	*philo_one(void *arg)
 {
 	t_shrmem		*stat;
-	static int		flag;
 	struct timeval	time;
-	size_t	ms;
-	size_t	ms1;
 
 	stat = arg;
 
@@ -86,34 +89,52 @@ void	*philo_one(void *arg)
 	stat->philo->start = (time.tv_usec / 1000) + (time.tv_sec * 1000);
 	while (the_end == 0 && stat->philo->cicles != 0)
 	{
-		// usleep(10000);
-		// pthread_mutex_lock(&stat->guard[4]);
-		// if (flag == 1)
+		// pthread_mutex_lock(&stat->guard[5]);
+		// if (stat->philo->id != stat->phils && stat->philo->id != 1)
 		// {
-		// 	pthread_mutex_unlock(&stat->guard[4]);
-		// 	break ;
+		// 	if (stat->neighbour[stat->philo->id + 1] == 0 || 
+		// 	stat->neighbour[stat->philo->id - 1] == 0)
+		// 	{
+		// 		pthread_mutex_unlock(&stat->guard[5]);
+		// 		while (stat->neighbour[stat->philo->id + 1] == 0 || 
+		// 		stat->neighbour[stat->philo->id - 1] == 0)
+		// 		 ;
+		// 		pthread_mutex_lock(&stat->guard[5]);
+		// 	}
+		// }
+		// else if (stat->philo->id == 1)
+		// {
+		// 	if (stat->neighbour[stat->philo->id + 1] == 0 || 
+		// 	stat->neighbour[stat->phils] == 0)
+		// 	{
+		// 		pthread_mutex_unlock(&stat->guard[5]);
+		// 		while (stat->neighbour[stat->philo->id + 1] == 0 || 
+		// 		stat->neighbour[stat->phils] == 0)
+		// 		 ;
+		// 		pthread_mutex_lock(&stat->guard[5]);
+		// 	}
+		// }
+		// else if (stat->philo->id == stat->phils)
+		// {
+		// 	if (stat->neighbour[stat->philo->id - 1] == 0 || 
+		// 	stat->neighbour[1] == 0)
+		// 	{
+		// 		pthread_mutex_unlock(&stat->guard[5]);
+		// 		while (stat->neighbour[stat->philo->id - 1] == 0 || 
+		// 		stat->neighbour[1] == 0)
+		// 		 ;
+		// 		pthread_mutex_lock(&stat->guard[5]);
+		// 	}
 		// }
 		take_forks(stat);
+		// pthread_mutex_unlock(&stat->guard[5]);
+		// pthread_mutex_lock(&stat->guard[9]);
 		gettimeofday(&time, NULL);
-		stat->philo->start = (time.tv_usec / 1000) + (time.tv_sec * 1000); 	
-		// if (flag == 1)
-		// {
-		// 	pthread_mutex_unlock(&stat->forks[stat->philo->right]);
-		// 	pthread_mutex_unlock(&stat->forks[stat->philo->left]);
-		// 	break ;
-		// }
-		// if (stat->philo->die <= 0)
-		// {
-		// 	print_time(stat, DEAD);
-		// 	flag = 1;
-		// 	pthread_mutex_unlock(&stat->forks[stat->philo->right]);
-		// 	pthread_mutex_unlock(&stat->forks[stat->philo->left]);
-		// 	break ;
-		// }
+		stat->philo->start = (time.tv_usec / 1000) + (time.tv_sec * 1000);
+		// pthread_mutex_unlock(&stat->guard[9]);
 		eating(stat);
 		sleeping(stat);
 		print_time(stat, THINKING);
-		// stat->philo->die -= stat->philo->sleep;
 	}
 	return (NULL);
 }
@@ -123,21 +144,22 @@ int		threading(t_init *init, int argc, int *val)
 	t_shrmem	*new;
 	int		b;
 
-	if (!(new = init_env(val, init->forks, init->guard)))
+	if (!(new = init_env(val, init)))
 		return (-1);
 	b = -1;
 	while (++b < val[0])
 	{
 		init_philo(&new[b], val, argc, b);
 		pthread_create(&init->philo[b], NULL, philo_one, &new[b]);
+		// usleep(50);
 		pthread_detach(init->philo[b]);
 		pthread_create(&init->add[b], NULL, is_dead, &new[b]);
-		usleep(3000);
+		// usleep(50);
 	}
 	b = -1;
 	while (++b < val[0]) 
 		pthread_join(init->add[b], NULL);
-	free(new);
+	// free(new);
 	return (0);
 }
 
@@ -147,6 +169,7 @@ int		main(int argc, char **argv)
 	int				b;
 	t_init			*init1;
 
+	the_end = 0;
 	b = -1;
 	if (argc < 5 || 6 < argc)
 		ft_perror("Wrong number of arguments");
@@ -156,7 +179,6 @@ int		main(int argc, char **argv)
 		return (-1);
 	init1 = init(val);
 	threading(init1, argc, val);
-	b = -1;
 	deinit(init1, val);
 	free(val);
 	return (0);
