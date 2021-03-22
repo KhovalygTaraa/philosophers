@@ -6,17 +6,17 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/20 21:59:37 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/22 20:46:19 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/23 00:14:55 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "one.h"
+#include "two.h"
 
 void	take_forks(t_shrmem *stat)
 {
-	pthread_mutex_lock(&stat->forks[stat->philo->left]);
+	sem_wait(stat->forks);
 	print_time(stat, TAKING_FORK);
-	pthread_mutex_lock(&stat->forks[stat->philo->right]);
+	sem_wait(stat->forks);
 	print_time(stat, TAKING_FORK);
 }
 
@@ -25,8 +25,8 @@ void	eating(t_shrmem *stat)
 	print_time(stat, EATING);
 	usleep((stat->philo->eat) * 1000);
 	stat->philo->cicles--;
-	pthread_mutex_unlock(&stat->forks[stat->philo->right]);
-	pthread_mutex_unlock(&stat->forks[stat->philo->left]);
+	sem_post(stat->forks);
+	sem_post(stat->forks);
 }
 
 void	sleeping(t_shrmem *stat)
@@ -40,21 +40,21 @@ void	print_time(t_shrmem *stat, int i)
 	struct timeval	time;
 	size_t			ms;
 
-	pthread_mutex_lock(&stat->guard[3]);
+	sem_wait(stat->guard1);
 	gettimeofday(&time, NULL);
 	ms = (time.tv_usec / 1000) + (time.tv_sec * 1000);
 	if (i == 1)
-		printf("%lums %d is thinking\n", ms - stat->time, stat->philo->id);
+		printf("%zums %d is thinking\n", ms - stat->time, stat->philo->id);
 	else if (i == 2)
-		printf("%lums %d is eating\n", ms - stat->time, stat->philo->id);
+		printf("%zums %d is eating\n", ms - stat->time, stat->philo->id);
 	else if (i == 3)
-		printf("%lums %d is sleeping\n", ms - stat->time, stat->philo->id);
+		printf("%zums %d is sleeping\n", ms - stat->time, stat->philo->id);
 	else if (i == 4)
-		printf("%lums %d has taken a fork\n", ms - stat->time, stat->philo->id);
+		printf("%zums %d has taken a fork\n", ms - stat->time, stat->philo->id);
 	else if (i == 5)
 	{
-		printf("%lums %d is dead\n", ms - stat->time, stat->philo->id);
+		printf("%zums %d is dead\n", ms - stat->time, stat->philo->id);
 		return ;
 	}
-	pthread_mutex_unlock(&stat->guard[3]);
+	sem_post(stat->guard1);
 }

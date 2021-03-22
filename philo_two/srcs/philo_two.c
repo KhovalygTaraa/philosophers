@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo_one.c                                        :+:      :+:    :+:   */
+/*   philo_two.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/22 15:46:40 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/23 01:11:28 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "one.h"
+#include "two.h"
 
 static void		*is_dead(void *arg)
 {
@@ -21,22 +21,22 @@ static void		*is_dead(void *arg)
 	stat = arg;
 	while (g_the_end == 0 && stat->philo->cicles != 0)
 	{
-		pthread_mutex_lock(&stat->guard[7]);
+		sem_wait(stat->guard2);
 		gettimeofday(&time, NULL);
 		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000) - stat->philo->start;
 		if (g_the_end == 1)
 		{
-			pthread_mutex_unlock(&stat->guard[7]);
+			sem_post(stat->guard2);
 			return (NULL);
 		}
 		if (ms >= stat->philo->die)
 		{
 			g_the_end = 1;
 			print_time(stat, DEAD);
-			pthread_mutex_unlock(&stat->guard[7]);
+			sem_post(stat->guard2);
 			return (NULL);
 		}
-		pthread_mutex_unlock(&stat->guard[7]);
+		sem_post(stat->guard2);
 	}
 	return (NULL);
 }
@@ -70,7 +70,7 @@ static int		*check_args(int argc, char **argv)
 	return (val);
 }
 
-static void		*philo_one(void *arg)
+static void		*philo_two(void *arg)
 {
 	t_shrmem		*stat;
 	struct timeval	time;
@@ -103,7 +103,7 @@ static int		threading(t_init *init, int argc, int *val)
 	{
 		if (init_philo(&new[b], val, argc, b) == -1)
 			return (-1);
-		if (pthread_create(&init->philo[b], NULL, philo_one, &new[b]) != 0)
+		if (pthread_create(&init->philo[b], NULL, philo_two, &new[b]) != 0)
 			return (-1);
 		if (pthread_detach(init->philo[b]) != 0)
 			return (-1);
@@ -121,10 +121,8 @@ static int		threading(t_init *init, int argc, int *val)
 int				main(int argc, char **argv)
 {
 	int				*val;
-	int				b;
 	t_init			*init;
 
-	b = -1;
 	if (argc < 5 || 6 < argc)
 		ft_perror("Wrong number of arguments");
 	if (argc < 5 || 6 < argc)
@@ -133,10 +131,11 @@ int				main(int argc, char **argv)
 		return (-1);
 	if (!(init = malloc(sizeof(t_init))))
 		return (-1);
-	if (!(init = main_init(val, init)))
+	if (!(main_init(val, init)))
+	{
 		deinit(init, val);
-	if (!init)
 		return (-1);
+	}
 	if (threading(init, argc, val) == -1)
 	{
 		deinit(init, val);
