@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/17 20:59:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 11:11:24 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/23 16:59:06 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ t_shrmem	*init_env(int *v, t_init *init)
 		new[i].forks = init->forks;
 		new[i].guard1 = init->guard1;
 		new[i].guard2 = init->guard2;
+		new[i].killer = init->killer;
 		new[i].phils = v[0];
 		i++;
 	}
@@ -52,12 +53,11 @@ t_shrmem	*init_env(int *v, t_init *init)
 
 t_init		*main_init(int *val, t_init *init)
 {
-	int		a;
-
-	a = -1;
-	if (!(init->philo = malloc(sizeof(pthread_t) * val[0])))
+	if (!(init->philo = malloc(sizeof(pid_t) * val[0])))
 		return (NULL);
 	if (!(init->add = malloc(sizeof(pthread_t) * val[0])))
+		return (NULL);
+	if (!(init->kamikadze = malloc(sizeof(pthread_t) * val[0])))
 		return (NULL);
 	if ((init->guard2 = sem_open("/mm2", O_CREAT, 0644, 1)) == SEM_FAILED)
 		return (NULL);
@@ -65,11 +65,15 @@ t_init		*main_init(int *val, t_init *init)
 		return (NULL);
 	if ((init->forks = sem_open("/mm", O_CREAT, 0644, val[0])) == SEM_FAILED)
 		return (NULL);
+	if ((init->killer = sem_open("/k", O_CREAT, 0644, 0)) == SEM_FAILED)
+		return (NULL);
 	if (sem_unlink("/mm2") == -1)
 		return (NULL);
 	if (sem_unlink("/mm1") == -1)
 		return (NULL);
 	if (sem_unlink("/mm") == -1)
+		return (NULL);
+	if (sem_unlink("/k") == -1)
 		return (NULL);
 	return (init);
 }
@@ -78,6 +82,7 @@ int			deinit(t_init *init, int *val)
 {
 	free(init->philo);
 	free(init->add);
+	free(init->kamikadze);
 	free(val);
 	free(init);
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 11:10:59 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/23 17:38:44 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,16 @@
 # include <sys/time.h>
 # include <semaphore.h>
 # include <string.h>
+# include <signal.h>
 # include <errno.h>
 # include <fcntl.h>
+# include <sys/wait.h>
 # define THINKING 1
 # define EATING 2
 # define SLEEPING 3
 # define TAKING_FORK 4
 # define DEAD 5
-
-int				g_the_end;
+# define ERROR 6
 
 typedef struct	s_ph
 {
@@ -51,6 +52,7 @@ typedef struct	s_shrmem
 	sem_t		*forks;
 	sem_t		*guard1;
 	sem_t		*guard2;
+	sem_t		*killer;
 }				t_shrmem;
 
 typedef struct	s_init
@@ -58,8 +60,10 @@ typedef struct	s_init
 	sem_t		*forks;
 	sem_t		*guard1;
 	sem_t		*guard2;
-	pthread_t	*philo;
+	sem_t		*killer;
+	pid_t		*philo;
 	pthread_t	*add;
+	pthread_t	*kamikadze;
 }				t_init;
 
 void			ft_perror(char *str);
@@ -72,8 +76,11 @@ void			take_forks(t_shrmem *stat);
 void			eating(t_shrmem *stat);
 void			sleeping(t_shrmem *stat);
 void			thinking(t_shrmem *stat);
-void			print_time(t_shrmem *stat, int i);
+void			*print_time(t_shrmem *stat, int i);
 t_init			*main_init(int *val, t_init *init);
 int				deinit(t_init *init, int *val);
+void			*die(void *arg);
+void			*is_dead(void *arg);
+int				create_threads(t_init *init, t_shrmem *new, int b);
 
 #endif

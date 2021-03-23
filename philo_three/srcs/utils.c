@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/15 15:08:45 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 11:11:23 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/23 17:38:10 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,21 @@ int		ft_atoi(char *str)
 		i++;
 	}
 	return (a * res);
+}
+
+int		create_threads(t_init *init, t_shrmem *new, int b)
+{
+	struct timeval	time;
+
+	gettimeofday(&time, NULL);
+	new[b].philo->start = (time.tv_usec / 1000) + (time.tv_sec * 1000);
+	if (pthread_create(&init->add[b], NULL, is_dead, &new[b]) != 0)
+		return (-1);
+	if (pthread_detach(init->add[b]) != 0)
+		return (-1);
+	if (pthread_create(&init->kamikadze[b], NULL, die, &new[b]) != 0)
+		return (-1);
+	if (pthread_detach(init->kamikadze[b]) != 0)
+		return (-1);
+	return (0);
 }

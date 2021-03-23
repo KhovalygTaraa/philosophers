@@ -6,39 +6,37 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 11:11:24 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/23 17:39:11 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "three.h"
 
-static void		*is_dead(void *arg)
+void			*is_dead(void *arg)
 {
 	t_shrmem			*stat;
 	struct timeval		time;
 	size_t				ms;
 
 	stat = arg;
-	while (g_the_end == 0 && stat->philo->cicles != 0)
+	while (stat->philo->cicles != 0)
 	{
-		sem_wait(stat->guard2);
+		if (sem_wait(stat->guard2) == -1)
+			return (print_time(stat, ERROR));
 		gettimeofday(&time, NULL);
 		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000) - stat->philo->start;
-		if (g_the_end == 1)
-		{
-			sem_post(stat->guard2);
-			return (NULL);
-		}
 		if (ms >= stat->philo->die)
 		{
-			g_the_end = 1;
-			print_time(stat, DEAD);
-			sem_post(stat->guard2);
-			return (NULL);
+			if (sem_post(stat->guard2) == -1)
+				return (print_time(stat, ERROR));
+			if (sem_post(stat->killer) == -1)
+				return (print_time(stat, ERROR));
+			return (print_time(stat, DEAD));
 		}
-		sem_post(stat->guard2);
+		if (sem_post(stat->guard2) == -1)
+			return (print_time(stat, ERROR));
 	}
-	return (NULL);
+	exit(1);
 }
 
 static int		*check_args(int argc, char **argv)
@@ -78,7 +76,7 @@ static void		*philo_three(void *arg)
 	stat = arg;
 	gettimeofday(&time, NULL);
 	stat->philo->start = (time.tv_usec / 1000) + (time.tv_sec * 1000);
-	while (g_the_end == 0 && stat->philo->cicles != 0)
+	while (stat->philo->cicles != 0)
 	{
 		take_forks(stat);
 		gettimeofday(&time, NULL);
@@ -92,28 +90,29 @@ static void		*philo_three(void *arg)
 
 static int		threading(t_init *init, int argc, int *val)
 {
-	t_shrmem	*new;
-	int			b;
+	t_shrmem		*new;
+	int				b;
 
-	g_the_end = 0;
 	if (!(new = init_env(val, init)))
 		return (-1);
 	b = -1;
 	while (++b < val[0])
 	{
-		if (init_philo(&new[b], val, argc, b) == -1)
-			return (-1);
-		if (pthread_create(&init->philo[b], NULL, philo_three, &new[b]) != 0)
-			return (-1);
-		if (pthread_detach(init->philo[b]) != 0)
-			return (-1);
-		if (pthread_create(&init->add[b], NULL, is_dead, &new[b]) != 0)
-			return (-1);
+		if ((init->philo[b] = fork()) == 0)
+		{
+			if (init_philo(&new[b], val, argc, b) == -1)
+				return (-1);
+			if (create_threads(init, new, b) == -1)
+				return (-1);
+			philo_three(&new[b]);
+			exit(1);
+		}
+		usleep(100);
 	}
 	b = -1;
 	while (++b < val[0])
-		if (pthread_join(init->add[b], NULL) != 0)
-			return (-1);
+		if (waitpid(init->philo[b], NULL, WUNTRACED) == -1)
+			exit(1);
 	free(new);
 	return (0);
 }
