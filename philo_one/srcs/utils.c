@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/15 15:08:45 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/15 16:59:25 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/24 18:52:19 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,12 @@ int		ft_atoi(char *str)
 		i++;
 	}
 	return (a * res);
+}
+
+long	chrono(void)
+{
+	struct timeval		time;
+
+	gettimeofday(&time, NULL);
+	return ((time.tv_usec / (long)1000) + (time.tv_sec * (long)1000));
 }
