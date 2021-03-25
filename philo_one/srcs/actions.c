@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/20 21:59:37 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/24 19:34:21 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 16:19:04 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,13 @@ void	print_time(t_shrmem *stat, int i, char *str)
 
 int		create_phil(t_shrmem *new, int b, t_init *init)
 {
-	if (init_philo(&new[b], val, argc, b) == -1)
-		return (-1);
 	if (pthread_create(&init->philo[b], NULL, philo_one, &new[b]) != 0)
 		return (-1);
 	if (pthread_detach(init->philo[b]) != 0)
 		return (-1);
-	stat->philo->start = chrono();
+	new->philo->start = chrono();
 	if (pthread_create(&init->add[b], NULL, is_dead, &new[b]) != 0)
 		return (-1);
 	usleep(500);
+	return (0);
 }

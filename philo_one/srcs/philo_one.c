@@ -6,13 +6,13 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/24 19:33:41 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 16:18:26 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "one.h"
 
-static void		*is_dead(void *arg)
+void		*is_dead(void *arg)
 {
 	t_shrmem			*stat;
 	long				ms;
@@ -70,7 +70,7 @@ static int		*check_args(int argc, char **argv)
 	return (val);
 }
 
-static void		*philo_one(void *arg)
+void		*philo_one(void *arg)
 {
 	t_shrmem		*stat;
 
@@ -99,7 +99,11 @@ static int		threading(t_init *init, int argc, int *val)
 		return (-1);
 	b = -1;
 	while (++b < val[0])
+	{
+		if (init_philo(&new[b], val, argc, b) == -1)
+			return (-1);
 		create_phil(new, b, init);
+	}
 	b = -1;
 	while (++b < val[0])
 		if (pthread_join(init->add[b], NULL) != 0)

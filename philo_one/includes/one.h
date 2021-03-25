@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/24 19:34:06 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 16:18:35 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,5 +67,7 @@ t_init			*main_init(int *val, t_init *init);
 int				deinit(t_init *init, int *val);
 long			chrono(void);
 int				create_phil(t_shrmem *new, int b, t_init *init);
+void			*philo_one(void *arg);
+void			*is_dead(void *arg);
 
 #endif

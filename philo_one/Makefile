@@ -6,7 +6,7 @@
 #    By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/15 15:00:53 by swquinc           #+#    #+#              #
-#    Updated: 2021/03/22 14:34:47 by swquinc          ###   ########.fr        #
+#    Updated: 2021/03/25 16:21:21 by swquinc          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,8 @@ NAME	= philo_one
 SRCS	= srcs/philo_one.c srcs/actions.c srcs/init.c srcs/utils.c
 
 OBJS	= philo_one.o actions.o init.o utils.o
+
+OBJS_D	= objs/philo_one.o objs/actions.o objs/init.o objs/utils.o
 
 CC		= gcc -Wall -Wextra -Werror
 
@@ -28,7 +30,7 @@ $(NAME):
 	mkdir objs
 	$(CC) $(SRCS) $(INCLUDES) -c
 	mv $(OBJS) objs/
-	$(CC) $(SRCS) $(INCLUDES) -o $(NAME)
+	$(CC) -pthread $(OBJS_D) $(INCLUDES) -o $(NAME)
 
 clean:
 	/bin/rm -rf objs
