@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/17 20:59:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 16:59:06 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:45:12 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 int			init_philo(t_shrmem *stat, int *val, int argc, int b)
 {
 	if (!(stat->philo = malloc(sizeof(t_ph))))
+		return (-1);
+	if ((stat->philo->guard3 = sem_open("/j5", O_CREAT, 0644, 1)) == SEM_FAILED)
+		return (-1);
+	if (sem_unlink("/j5") == -1)
 		return (-1);
 	stat->philo->id = b + 1;
 	stat->philo->start_die = val[1];
@@ -59,21 +63,21 @@ t_init		*main_init(int *val, t_init *init)
 		return (NULL);
 	if (!(init->kamikadze = malloc(sizeof(pthread_t) * val[0])))
 		return (NULL);
-	if ((init->guard2 = sem_open("/mm2", O_CREAT, 0644, 1)) == SEM_FAILED)
+	if ((init->guard2 = sem_open("/ml2", O_CREAT, 0644, 1)) == SEM_FAILED)
 		return (NULL);
-	if ((init->guard1 = sem_open("/mm1", O_CREAT, 0644, 1)) == SEM_FAILED)
+	if ((init->guard1 = sem_open("/ml1", O_CREAT, 0644, 1)) == SEM_FAILED)
 		return (NULL);
-	if ((init->forks = sem_open("/mm", O_CREAT, 0644, val[0])) == SEM_FAILED)
+	if ((init->forks = sem_open("/ll", O_CREAT, 0644, val[0])) == SEM_FAILED)
 		return (NULL);
-	if ((init->killer = sem_open("/k", O_CREAT, 0644, 0)) == SEM_FAILED)
+	if ((init->killer = sem_open("/j", O_CREAT, 0644, 0)) == SEM_FAILED)
 		return (NULL);
-	if (sem_unlink("/mm2") == -1)
+	if (sem_unlink("/ml2") == -1)
 		return (NULL);
-	if (sem_unlink("/mm1") == -1)
+	if (sem_unlink("/ml1") == -1)
 		return (NULL);
-	if (sem_unlink("/mm") == -1)
+	if (sem_unlink("/ll") == -1)
 		return (NULL);
-	if (sem_unlink("/k") == -1)
+	if (sem_unlink("/j") == -1)
 		return (NULL);
 	return (init);
 }
@@ -85,5 +89,5 @@ int			deinit(t_init *init, int *val)
 	free(init->kamikadze);
 	free(val);
 	free(init);
-	return (0);
+	return (-1);
 }

@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 17:38:44 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:35:57 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ typedef struct	s_ph
 	int			left;
 	int			cicles;
 	int			right;
+	sem_t		*guard3;
 	size_t		start;
 }				t_ph;
 

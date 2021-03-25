@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 17:39:11 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:38:58 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@ void			*is_dead(void *arg)
 		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000) - stat->philo->start;
 		if (ms >= stat->philo->die)
 		{
+			sem_wait(stat->philo->guard3);
 			if (sem_post(stat->guard2) == -1)
 				return (print_time(stat, ERROR));
 			if (sem_post(stat->killer) == -1)
 				return (print_time(stat, ERROR));
+			sem_post(stat->philo->guard3);
 			return (print_time(stat, DEAD));
 		}
 		if (sem_post(stat->guard2) == -1)
@@ -85,7 +87,7 @@ static void		*philo_three(void *arg)
 		sleeping(stat);
 		print_time(stat, THINKING);
 	}
-	return (NULL);
+	exit(1);
 }
 
 static int		threading(t_init *init, int argc, int *val)
@@ -105,7 +107,6 @@ static int		threading(t_init *init, int argc, int *val)
 			if (create_threads(init, new, b) == -1)
 				return (-1);
 			philo_three(&new[b]);
-			exit(1);
 		}
 		usleep(100);
 	}
@@ -131,16 +132,9 @@ int				main(int argc, char **argv)
 	if (!(init = malloc(sizeof(t_init))))
 		return (-1);
 	if (!(main_init(val, init)))
-	{
-		deinit(init, val);
-		return (-1);
-	}
+		return (deinit(init, val));
 	if (threading(init, argc, val) == -1)
-	{
-		deinit(init, val);
-		return (-1);
-	}
-	if (deinit(init, val) == -1)
-		return (-1);
+		return (deinit(init, val));
+	deinit(init, val);
 	return (0);
 }

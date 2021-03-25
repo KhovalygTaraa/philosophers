@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/20 21:59:37 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 17:42:46 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:39:41 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,11 @@ void	take_forks(t_shrmem *stat)
 
 void	eating(t_shrmem *stat)
 {
+	sem_wait(stat->philo->guard3);
 	print_time(stat, EATING);
 	usleep((stat->philo->eat) * 1000);
 	stat->philo->cicles--;
+	sem_post(stat->philo->guard3);
 	if (sem_post(stat->forks) == -1)
 		print_time(stat, ERROR);
 	if (sem_post(stat->forks) == -1)
