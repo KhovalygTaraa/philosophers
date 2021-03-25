@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 01:11:28 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:07:01 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,16 @@ static void		*is_dead(void *arg)
 		gettimeofday(&time, NULL);
 		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000) - stat->philo->start;
 		if (g_the_end == 1)
-		{
 			sem_post(stat->guard2);
+		if (g_the_end == 1)
 			return (NULL);
-		}
-		if (ms >= stat->philo->die)
+		if (ms > stat->philo->die)
 		{
+			sem_wait(stat->philo->et);
 			g_the_end = 1;
-			print_time(stat, DEAD);
 			sem_post(stat->guard2);
-			return (NULL);
+			sem_post(stat->philo->et);
+			return (print_time(stat, DEAD));
 		}
 		sem_post(stat->guard2);
 	}
@@ -132,15 +132,9 @@ int				main(int argc, char **argv)
 	if (!(init = malloc(sizeof(t_init))))
 		return (-1);
 	if (!(main_init(val, init)))
-	{
-		deinit(init, val);
-		return (-1);
-	}
+		return (deinit(init, val));
 	if (threading(init, argc, val) == -1)
-	{
-		deinit(init, val);
-		return (-1);
-	}
+		return (deinit(init, val));
 	if (deinit(init, val) == -1)
 		return (-1);
 	return (0);

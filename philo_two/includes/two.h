@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 01:12:10 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:06:48 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ typedef struct	s_ph
 	int			cicles;
 	int			right;
 	size_t		start;
+	sem_t		*et;
 }				t_ph;
 
 typedef struct	s_shrmem
@@ -51,6 +52,7 @@ typedef struct	s_shrmem
 	sem_t		*forks;
 	sem_t		*guard1;
 	sem_t		*guard2;
+	sem_t		*guard3;
 }				t_shrmem;
 
 typedef struct	s_init
@@ -58,6 +60,7 @@ typedef struct	s_init
 	sem_t		*forks;
 	sem_t		*guard1;
 	sem_t		*guard2;
+	sem_t		*guard3;
 	pthread_t	*philo;
 	pthread_t	*add;
 }				t_init;
@@ -72,7 +75,7 @@ void			take_forks(t_shrmem *stat);
 void			eating(t_shrmem *stat);
 void			sleeping(t_shrmem *stat);
 void			thinking(t_shrmem *stat);
-void			print_time(t_shrmem *stat, int i);
+void			*print_time(t_shrmem *stat, int i);
 t_init			*main_init(int *val, t_init *init);
 int				deinit(t_init *init, int *val);
 

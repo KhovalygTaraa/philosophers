@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/17 20:59:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/23 01:10:28 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 17:51:35 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,10 @@ int			init_philo(t_shrmem *stat, int *val, int argc, int b)
 	stat->philo->eat = val[2];
 	stat->philo->sleep = val[3];
 	stat->philo->cicles = -1;
+	if ((stat->philo->et = sem_open("/mm4", O_CREAT, 0644, 1)) == SEM_FAILED)
+		return (-1);
+	if (sem_unlink("/mm4") == -1)
+		return (-1);
 	if (argc == 6)
 		stat->philo->cicles = val[4];
 	return (0);
@@ -44,6 +48,7 @@ t_shrmem	*init_env(int *v, t_init *init)
 		new[i].forks = init->forks;
 		new[i].guard1 = init->guard1;
 		new[i].guard2 = init->guard2;
+		new[i].guard3 = init->guard3;
 		new[i].phils = v[0];
 		i++;
 	}
@@ -59,13 +64,17 @@ t_init		*main_init(int *val, t_init *init)
 		return (NULL);
 	if (!(init->add = malloc(sizeof(pthread_t) * val[0])))
 		return (NULL);
-	if ((init->guard2 = sem_open("/mm2", O_CREAT, 0644, 1)) == SEM_FAILED)
+	if ((init->guard2 = sem_open("/mm6", O_CREAT, 0644, 1)) == SEM_FAILED)
 		return (NULL);
 	if ((init->guard1 = sem_open("/mm1", O_CREAT, 0644, 1)) == SEM_FAILED)
 		return (NULL);
 	if ((init->forks = sem_open("/mm", O_CREAT, 0644, val[0])) == SEM_FAILED)
 		return (NULL);
-	if (sem_unlink("/mm2") == -1)
+	if ((init->guard3 = sem_open("/mm9", O_CREAT, 0644, 1)) == SEM_FAILED)
+		return (NULL);
+	if (sem_unlink("/mm9") == -1)
+		return (NULL);
+	if (sem_unlink("/mm6") == -1)
 		return (NULL);
 	if (sem_unlink("/mm1") == -1)
 		return (NULL);
@@ -80,5 +89,5 @@ int			deinit(t_init *init, int *val)
 	free(init->add);
 	free(val);
 	free(init);
-	return (0);
+	return (-1);
 }

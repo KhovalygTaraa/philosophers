@@ -6,13 +6,13 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 16:18:26 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/25 18:14:44 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "one.h"
 
-void		*is_dead(void *arg)
+void			*is_dead(void *arg)
 {
 	t_shrmem			*stat;
 	long				ms;
@@ -21,7 +21,6 @@ void		*is_dead(void *arg)
 	while (g_the_end == 0 && stat->philo->cicles != 0)
 	{
 		ms = chrono() - stat->philo->start;
-		pthread_mutex_lock(&stat->philo->guard);
 		pthread_mutex_lock(&stat->guard[7]);
 		if (g_the_end == 1)
 		{
@@ -30,13 +29,14 @@ void		*is_dead(void *arg)
 		}
 		if (ms > stat->philo->die)
 		{
+			pthread_mutex_lock(&stat->philo->guard);
 			g_the_end = 1;
 			print_time(stat, 1, "died");
 			pthread_mutex_unlock(&stat->guard[7]);
+			pthread_mutex_unlock(&stat->philo->guard);
 			return (NULL);
 		}
 		pthread_mutex_unlock(&stat->guard[7]);
-		pthread_mutex_unlock(&stat->philo->guard);
 	}
 	return (NULL);
 }
@@ -70,7 +70,7 @@ static int		*check_args(int argc, char **argv)
 	return (val);
 }
 
-void		*philo_one(void *arg)
+void			*philo_one(void *arg)
 {
 	t_shrmem		*stat;
 
