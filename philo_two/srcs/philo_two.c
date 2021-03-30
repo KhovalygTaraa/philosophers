@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 18:07:01 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/30 15:00:44 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,24 +19,21 @@ static void		*is_dead(void *arg)
 	size_t				ms;
 
 	stat = arg;
-	while (g_the_end == 0 && stat->philo->cicles != 0)
+	while (stat->philo->cicles != 0)
 	{
-		sem_wait(stat->guard2);
+		usleep(stat->philo->start_die * 1000);
 		gettimeofday(&time, NULL);
-		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000) - stat->philo->start;
-		if (g_the_end == 1)
-			sem_post(stat->guard2);
-		if (g_the_end == 1)
-			return (NULL);
-		if (ms > stat->philo->die)
+		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000);
+		if ((ms - stat->philo->start) >= stat->philo->die)
 		{
 			sem_wait(stat->philo->et);
-			g_the_end = 1;
+			if (stat->philo->cicles == 0)
+				sem_wait(stat->guard1);
+			else
+				print_time(stat, DEAD);
 			sem_post(stat->guard2);
-			sem_post(stat->philo->et);
-			return (print_time(stat, DEAD));
+			return (NULL);
 		}
-		sem_post(stat->guard2);
 	}
 	return (NULL);
 }
@@ -78,7 +75,7 @@ static void		*philo_two(void *arg)
 	stat = arg;
 	gettimeofday(&time, NULL);
 	stat->philo->start = (time.tv_usec / 1000) + (time.tv_sec * 1000);
-	while (g_the_end == 0 && stat->philo->cicles != 0)
+	while (stat->philo->cicles != 0)
 	{
 		take_forks(stat);
 		gettimeofday(&time, NULL);
@@ -96,6 +93,7 @@ static int		threading(t_init *init, int argc, int *val)
 	int			b;
 
 	g_the_end = 0;
+	sem_wait(init->guard2);
 	if (!(new = init_env(val, init)))
 		return (-1);
 	b = -1;
@@ -109,11 +107,13 @@ static int		threading(t_init *init, int argc, int *val)
 			return (-1);
 		if (pthread_create(&init->add[b], NULL, is_dead, &new[b]) != 0)
 			return (-1);
+		if (pthread_detach(init->add[b]) != 0)
+			return (-1);
 	}
+	sem_wait(init->guard2);
 	b = -1;
 	while (++b < val[0])
-		if (pthread_join(init->add[b], NULL) != 0)
-			return (-1);
+		free(new[b].philo);
 	free(new);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 18:35:57 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/29 18:15:05 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct	s_shrmem
 	sem_t		*forks;
 	sem_t		*guard1;
 	sem_t		*guard2;
+	sem_t		*guard4;
 	sem_t		*killer;
 }				t_shrmem;
 
@@ -61,6 +62,7 @@ typedef struct	s_init
 	sem_t		*forks;
 	sem_t		*guard1;
 	sem_t		*guard2;
+	sem_t		*guard4;
 	sem_t		*killer;
 	pid_t		*philo;
 	pthread_t	*add;
@@ -83,5 +85,6 @@ int				deinit(t_init *init, int *val);
 void			*die(void *arg);
 void			*is_dead(void *arg);
 int				create_threads(t_init *init, t_shrmem *new, int b);
+void			ft_usleep(long i);
 
 #endif

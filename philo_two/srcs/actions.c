@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/20 21:59:37 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 18:06:40 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/29 21:39:57 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	eating(t_shrmem *stat)
 {
 	sem_wait(stat->philo->et);
 	print_time(stat, EATING);
-	usleep((stat->philo->eat) * 1000);
+	ft_usleep((stat->philo->eat) * 1000);
 	stat->philo->cicles--;
 	sem_post(stat->philo->et);
 	sem_post(stat->forks);
@@ -36,7 +36,7 @@ void	eating(t_shrmem *stat)
 void	sleeping(t_shrmem *stat)
 {
 	print_time(stat, SLEEPING);
-	usleep((stat->philo->sleep) * 1000);
+	ft_usleep((stat->philo->sleep) * 1000);
 }
 
 void	*print_time(t_shrmem *stat, int i)
@@ -57,7 +57,7 @@ void	*print_time(t_shrmem *stat, int i)
 		printf("%zums %d has taken a fork\n", ms - stat->time, stat->philo->id);
 	if (i == 5)
 	{
-		printf("%zums %d is dead\n", ms - stat->time, stat->philo->id);
+		printf("%zums %d died\n", ms - stat->time, stat->philo->id);
 		return (NULL);
 	}
 	sem_post(stat->guard1);

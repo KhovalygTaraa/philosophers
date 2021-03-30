@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 18:06:48 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/29 19:49:49 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,5 +78,7 @@ void			thinking(t_shrmem *stat);
 void			*print_time(t_shrmem *stat, int i);
 t_init			*main_init(int *val, t_init *init);
 int				deinit(t_init *init, int *val);
+void			ft_usleep(long i);
+int				unlink_sem(void);
 
 #endif

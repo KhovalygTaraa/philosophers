@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 18:14:44 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/30 14:37:39 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,25 +18,23 @@ void			*is_dead(void *arg)
 	long				ms;
 
 	stat = arg;
-	while (g_the_end == 0 && stat->philo->cicles != 0)
+	while (stat->philo->cicles != 0)
 	{
-		ms = chrono() - stat->philo->start;
-		pthread_mutex_lock(&stat->guard[7]);
-		if (g_the_end == 1)
+		usleep(stat->philo->start_die * 1000);
+		ms = chrono();
+		if (ms - stat->philo->start >= stat->philo->die)
 		{
-			pthread_mutex_unlock(&stat->guard[7]);
-			return (NULL);
-		}
-		if (ms > stat->philo->die)
-		{
+			pthread_mutex_lock(&stat->guard[7]);
 			pthread_mutex_lock(&stat->philo->guard);
-			g_the_end = 1;
-			print_time(stat, 1, "died");
-			pthread_mutex_unlock(&stat->guard[7]);
-			pthread_mutex_unlock(&stat->philo->guard);
+			if (stat->philo->cicles == 0)
+			{
+				pthread_mutex_lock(&stat->guard[3]);
+				pthread_mutex_unlock(&stat->guard[0]);
+			}
+			else
+				print_time(stat, ms, "died");
 			return (NULL);
 		}
-		pthread_mutex_unlock(&stat->guard[7]);
 	}
 	return (NULL);
 }
@@ -79,12 +77,18 @@ void			*philo_one(void *arg)
 	while (stat->philo->cicles != 0)
 	{
 		take_forks(stat);
+		if (g_the_end == 1)
+			return (NULL);
 		stat->philo->start = chrono();
 		eating(stat);
+		if (g_the_end == 1)
+			return (NULL);
 		sleeping(stat);
-		stat->philo->die = stat->philo->die + (chrono() -
-		stat->philo->start - stat->philo->sleep - stat->philo->eat);
+		if (g_the_end == 1)
+			return (NULL);
 		print_time(stat, 0, "is thinking");
+		if (g_the_end == 1)
+			return (NULL);
 	}
 	return (NULL);
 }
@@ -94,20 +98,13 @@ static int		threading(t_init *init, int argc, int *val)
 	t_shrmem	*new;
 	int			b;
 
+	pthread_mutex_lock(&init->guard[0]);
 	g_the_end = 0;
 	if (!(new = init_env(val, init)))
 		return (-1);
-	b = -1;
-	while (++b < val[0])
-	{
-		if (init_philo(&new[b], val, argc, b) == -1)
-			return (-1);
-		create_phil(new, b, init);
-	}
-	b = -1;
-	while (++b < val[0])
-		if (pthread_join(init->add[b], NULL) != 0)
-			return (-1);
+	if (double_threads(val, new, init, argc) == -1)
+		return (-1);
+	pthread_mutex_lock(&init->guard[0]);
 	b = -1;
 	while (++b < val[0])
 	{

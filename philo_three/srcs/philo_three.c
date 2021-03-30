@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:22:47 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 18:38:58 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/29 20:37:37 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,19 @@ void			*is_dead(void *arg)
 	stat = arg;
 	while (stat->philo->cicles != 0)
 	{
-		if (sem_wait(stat->guard2) == -1)
-			return (print_time(stat, ERROR));
+		usleep((stat->philo->start_die) * 1000);
 		gettimeofday(&time, NULL);
-		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000) - stat->philo->start;
-		if (ms >= stat->philo->die)
+		ms = (time.tv_usec / 1000) + (time.tv_sec * 1000);
+		if (ms - stat->philo->start >= stat->philo->die)
 		{
 			sem_wait(stat->philo->guard3);
-			if (sem_post(stat->guard2) == -1)
+			if (sem_wait(stat->guard2) == -1)
 				return (print_time(stat, ERROR));
+			print_time(stat, DEAD);
 			if (sem_post(stat->killer) == -1)
 				return (print_time(stat, ERROR));
-			sem_post(stat->philo->guard3);
-			return (print_time(stat, DEAD));
+			return (NULL);
 		}
-		if (sem_post(stat->guard2) == -1)
-			return (print_time(stat, ERROR));
 	}
 	exit(1);
 }
@@ -108,7 +105,6 @@ static int		threading(t_init *init, int argc, int *val)
 				return (-1);
 			philo_three(&new[b]);
 		}
-		usleep(100);
 	}
 	b = -1;
 	while (++b < val[0])

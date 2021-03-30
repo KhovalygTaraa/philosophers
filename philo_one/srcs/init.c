@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/17 20:59:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/24 19:27:25 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/30 14:51:04 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 
 int			init_philo(t_shrmem *stat, int *val, int argc, int b)
 {
+	struct timeval	time;
+
+	gettimeofday(&time, NULL);
+	stat->time = (time.tv_usec / 1000) + (time.tv_sec * 1000);
 	if (!(stat->philo = malloc(sizeof(t_ph))))
 		return (-1);
 	stat->philo->id = b + 1;
@@ -27,8 +31,8 @@ int			init_philo(t_shrmem *stat, int *val, int argc, int b)
 		return (-1);
 	if (b + 1 == val[0])
 	{
-		stat->philo->right = 0;
-		stat->philo->left = b;
+		if (val[0] != 1)
+			stat->philo->right = 0;
 	}
 	stat->philo->cicles = -1;
 	if (argc == 6)
@@ -40,13 +44,15 @@ t_shrmem	*init_env(int *v, t_init *init)
 {
 	t_shrmem		*new;
 	int				i;
+	long			m;
 
+	m = chrono();
 	i = 0;
 	if (!(new = malloc(sizeof(t_shrmem) * (v[0]))))
 		return (NULL);
 	while (i != v[0])
 	{
-		new[i].time = chrono();
+		new[i].time = m;
 		new[i].forks = init->forks;
 		new[i].guard = init->guard;
 		new[i].phils = v[0];
@@ -57,7 +63,7 @@ t_shrmem	*init_env(int *v, t_init *init)
 
 t_init		*main_init(int *val, t_init *init)
 {
-	int				b;
+	int		b;
 
 	if (!(init->philo = malloc(sizeof(pthread_t) * val[0])))
 		return (NULL);

@@ -6,7 +6,7 @@
 /*   By: swquinc <swquinc@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/14 14:23:39 by swquinc           #+#    #+#             */
-/*   Updated: 2021/03/25 16:18:35 by swquinc          ###   ########.fr       */
+/*   Updated: 2021/03/29 19:40:28 by swquinc          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,14 @@ t_shrmem		*init_env(int *val, t_init *init);
 void			take_forks(t_shrmem *stat);
 void			eating(t_shrmem *stat);
 void			sleeping(t_shrmem *stat);
-void			print_time(t_shrmem *stat, int i, char *str);
+void			print_time(t_shrmem *stat, long i, char *str);
 t_init			*main_init(int *val, t_init *init);
 int				deinit(t_init *init, int *val);
 long			chrono(void);
 int				create_phil(t_shrmem *new, int b, t_init *init);
 void			*philo_one(void *arg);
 void			*is_dead(void *arg);
+void			ft_usleep(long i);
+int				double_threads(int *val, t_shrmem *new, t_init *init, int argc);
 
 #endif
